@@ -10,10 +10,19 @@ print('player 2 name: ')
 player2.name = io.read()
 print('player 2 name is '..player2.name)
 
-Deck = {Cards.Clotz,Cards.Clotz,Cards.Clotz,Cards.Clotz,Cards.Clotz,Cards.Clotz,Cards.Clotz,
-                Cards.Duo,Cards.Duo,Cards.Duo,Cards.Duo,Cards.Duo,Cards.Duo}
+Deck = {Cards.Clotz,Cards.Clotz,Cards.Clotz,
+        Cards.Wuru,Cards.Wuru,Cards.Wuru,
+        Cards.Pretu,Cards.Pretu,Cards.Pretu,
+        Cards.Preru,Cards.Preru,Cards.Preru,
+        Cards.Prezu,Cards.Prezu,Cards.Prezu,
+        Cards.Duo,Cards.Duo,
+        Cards.Tu,
+        Cards.Ru,
+        Cards.Zu
+    
+    }
 
-Functions.setDeck = function( player )
+function setDeck( player )
     tempcard = {}
     for k,v in pairs( Deck ) do
         tempcard = Functions.abstractToConcrete(v,tempcard)
@@ -23,9 +32,9 @@ Functions.setDeck = function( player )
     Functions.shuffle( player.deck )
 end
 
-Functions.setGame = function( player , opponent )
-    Functions.setDeck( player )
-    Functions.setDeck( opponent )
+function setGame( player , opponent )
+    setDeck( player )
+    setDeck( opponent )
     i = 0
     while i < 5 do
         Functions.move( player.deck[#player.deck] , player.deck , player.hand ) -- player compra 5
@@ -35,20 +44,20 @@ Functions.setGame = function( player , opponent )
     print('GAME IS SET')
 end
 
-Functions.upkeep = function( player , opponent )
+function upkeep( player , opponent )
     for i = 1 , #player.field do
         player.field[i].activated = false
     end
 end
 
-Functions.winCheck = function( player , opponent )
+function winCheck( player , opponent )
     if player.points >= 12 and player.points > opponent.points then
         print(player.name..' WON!')
         return true
     end
 end
 
-Functions.selectionStep = function( player , opponent )
+function selectionStep( player , opponent )
     print('PLAYER '..player.name..' TURN')
     print('SELECTION STEP')
     local selectionZone = {} -- separa zona pra colocar 2 cartas do topo do deck
@@ -60,7 +69,7 @@ Functions.selectionStep = function( player , opponent )
     Functions.move( selectionZone[1] , selectionZone , player.bin )
 end
 
-Functions.deploymentStep = function( player , opponent )
+function deploymentStep( player , opponent )
     while true do
         print('DEPLOYMENT STEP')
         print('YOUR POINTS: '..player.points)
@@ -77,7 +86,7 @@ Functions.deploymentStep = function( player , opponent )
     end
 end
 
-Functions.activationStep = function( player , opponent )
+function activationStep( player , opponent )
     while true do
         print('ACTIVATION STEP')
         print('YOUR POINTS: '..player.points)
@@ -100,23 +109,23 @@ Functions.activationStep = function( player , opponent )
     end
 end
 
-Functions.turn = function(player , opponent)
-    Functions.upkeep( player , opponent )
-    if Functions.winCheck( player , opponent ) == true then return true end
-    Functions.selectionStep( player , opponent )
-    Functions.deploymentStep( player , opponent )
-    Functions.activationStep( player , opponent ) 
+function turn(player , opponent)
+    upkeep( player , opponent )
+    if winCheck( player , opponent ) == true then return true end
+    selectionStep( player , opponent )
+    deploymentStep( player , opponent )
+    activationStep( player , opponent ) 
 end
 
-Functions.startGame = function( player , opponent )
-    Functions.setGame( player , opponent )
+function startGame( player , opponent )
+    setGame( player , opponent )
     while true do
-        if Functions.turn( player , opponent ) == true then 
+        if turn( player , opponent ) == true then 
             return  
-        elseif Functions.turn( opponent , player ) == true then
+        elseif turn( opponent , player ) == true then
             return
         end
     end
 end
 
-Functions.startGame(player1,player2)
+startGame(player1,player2)
