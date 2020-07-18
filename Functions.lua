@@ -1,5 +1,7 @@
 Functions = {}
 
+-- These functions are needed for Cards.lua
+
 Functions.find = function( where ,what )
     for k,v in pairs(where) do
         if v == what then
@@ -66,12 +68,43 @@ Functions.newPlayer = function()
         hand = {},
         field = {},
         bin = {},
-        erased = {}
+        erased = {},
+        tokenBin = {}
     }
     return player
 end
 
-Functions.erase_n_from_bin = function( player , n )
+Functions.newToken = function( player )
+    local token = {
+        name = 'Token',
+        originalPoints = 1,
+        points = 1,
+        activated = false,
+        costText = '',
+        effectText = '',
+        cost = function( player )
+            return true
+        end,
+        effect = function( card , player , opponent )
+            return
+        end
+    }
+    player.field[#player.field + 1] = token
+    print(player.name..' created a 1 point unit token.')
+end
+
+Functions.checkDeath = function( card , player )
+    if card.points < 1 then
+        if card.name == 'Token' then
+            Functions.move( card , player.field , player.tokenBin)
+        else
+            Functions.move( card , player.field , player.bin )
+        end
+        print(card.name..' was destroyed.')
+    end
+end
+
+Functions.erase_n_from_bin = function( player , n ) -- move n cartas do bin do player pro erased
     if #player.bin >= n then
         while n > 0 do
             print('Erase '..n..' card(s) from your bin:')
