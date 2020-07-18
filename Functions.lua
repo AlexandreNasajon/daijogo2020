@@ -31,6 +31,13 @@ Functions.move = function( what , origin , destiny )
     end
 end
 
+Functions.drawCards = function( player , n )
+    for i = 1 , n do
+        Functions.move( player.deck[#player.deck] , player.deck , player.hand )
+    end
+    print(player.name..' drew '..n..' cards.')
+end
+
 Functions.printZone = function( zone )
     local i = 1
     print("#","Name           ","Points") --name tem 15 caracteres
@@ -93,30 +100,36 @@ Functions.newToken = function( player )
     print(player.name..' created a 1 point unit token.')
 end
 
+Functions.resetCard = function( card )
+    card.points = card.originalPoints
+    card.activated = false
+end
+
 Functions.checkDeath = function( card , player )
     if card.points < 1 then
         if card.name == 'Token' then
             Functions.move( card , player.field , player.tokenBin)
         else
+            Functions.resetCard( card )
             Functions.move( card , player.field , player.bin )
         end
         print(card.name..' was destroyed.')
     end
 end
 
-Functions.erase_n_from_bin = function( player , n ) -- move n cartas do bin do player pro erased
-    if #player.bin >= n then
+Functions.moveMany = function( n , origin , destiny )
+    if #origin >= n then
         while n > 0 do
             print('Erase '..n..' card(s) from your bin:')
-            Functions.move( Functions.pick( player.bin ) , player.bin , player.erased )
+            Functions.move( Functions.pick( origin ) , origin , destiny )
             n = n - 1
             return true
         end
     end
 end
 
-Functions.updatePoints = function( player ) -- calcula os pontos do player
-    player.points = 0 -- reseta pra não acumular a cada update
+Functions.updatePoints = function( player )
+    player.points = 0 -- resets points so they wont accumulate
     for i = 1 , #player.field do
         player.points = player.points + player.field[i].points
     end
