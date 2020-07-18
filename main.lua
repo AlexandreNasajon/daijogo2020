@@ -36,9 +36,9 @@ function setGame( player , opponent )
     setDeck( player )
     setDeck( opponent )
     i = 0
-    while i < 5 do
-        Functions.move( player.deck[#player.deck] , player.deck , player.hand ) -- player compra 5
-        Functions.move( opponent.deck[#opponent.deck] , opponent.deck , opponent.hand ) -- oponente compra 5
+    while i < 4 do
+        Functions.move( player.deck[#player.deck] , player.deck , player.hand ) -- player compra 4
+        Functions.move( opponent.deck[#opponent.deck] , opponent.deck , opponent.hand ) -- oponente compra 4
         i = i + 1
     end
     print('GAME IS SET')
