@@ -19,6 +19,9 @@ Functions.shuffle = function(a)
 	return a
 end
 
+--[[
+    The most important function
+]]
 Functions.move = function( what , origin , destiny )
     destiny[#destiny+1] = what
     local j = Functions.find( origin , what)
@@ -32,17 +35,24 @@ Functions.move = function( what , origin , destiny )
 end
 
 Functions.drawCards = function( player , n )
-    for i = 1 , n do
-        Functions.move( player.deck[#player.deck] , player.deck , player.hand )
+    if #player.deck > 0 then
+        if n > #player.deck then
+            n = #player.deck
+        end
+        for i = 1 , n do
+            Functions.move( player.deck[#player.deck] , player.deck , player.hand )
+        end
+        print(player.name..' drew '..n..' cards.')
+    else
+        print('THE DECK IS EMPTY')
     end
-    print(player.name..' drew '..n..' cards.')
 end
 
 Functions.printZone = function( zone )
     local i = 1
-    print("#","Name           ","Points") --name tem 15 caracteres
+    print("#","Name","Points","Has been activated")
     while i <= #zone do
-        print(i,zone[i].name,zone[i].points)
+        print(i,zone[i].name,zone[i].points,zone[i].activated)
         i = i+1
     end
 end
@@ -54,7 +64,10 @@ Functions.printCard = function( card )
     print('Effect: '..card.effectText)
 end
 
-Functions.pick = function( where ) -- escolhe um elemento de uma tabela
+--[[
+    Shows a table (where) and returns the selected element
+]]
+Functions.pick = function( where )
     while true do
         Functions.printZone( where)
         print('Pick one:')
@@ -81,6 +94,9 @@ Functions.newPlayer = function()
     return player
 end
 
+--[[ Creates a unit token on the player's field,
+    since they dont have effects, they cant be activated
+]]
 Functions.newToken = function( player )
     local token = {
         name = 'Token',
@@ -93,18 +109,41 @@ Functions.newToken = function( player )
             return true
         end,
         effect = function( card , player , opponent )
-            return
+            return false
         end
     }
     player.field[#player.field + 1] = token
     print(player.name..' created a 1 point unit token.')
 end
 
+--[[ Certain effects will ask the player to destroy tokens in order to activate
+    They will count the number of tokens and then ask the player how many they wish to destroy
+]]
+Functions.countTokens = function( player )
+    n = 0
+    for i = 1 , #player.field do
+        if player.field[i].name == 'Token' then
+            n = n + 1
+        end
+    end
+    return n
+end
+
+--[[ When cards move from the field to any other zone, they must be reset,
+    unless the card moves from one field to another, that is.
+    It's important to reset the card in this situation so as
+    to mimic the physical card game, where counters cant be moved outside of the field.
+]]
 Functions.resetCard = function( card )
     card.points = card.originalPoints
     card.activated = false
 end
 
+--[[
+    When a unit's points become 0, it is destroyed (sent to the bin)
+    Since tokens dont go to the regular bin and should be completely eliminated,
+    the player.tokenBin serves as an easy way to get rid of them
+]]
 Functions.checkDeath = function( card , player )
     if card.points < 1 then
         if card.name == 'Token' then
@@ -117,19 +156,28 @@ Functions.checkDeath = function( card , player )
     end
 end
 
+--[[
+    Some effects require the player to move many cards from a zone to another
+    moveMany shows all cards from the origin zone for the player to pick, one by one,
+    and moves them all to the destiny zone
+]]
 Functions.moveMany = function( n , origin , destiny )
     if #origin >= n then
         while n > 0 do
-            print('Erase '..n..' card(s) from your bin:')
+            print('Select '..n..' card(s):')
             Functions.move( Functions.pick( origin ) , origin , destiny )
             n = n - 1
-            return true
         end
+        return true
     end
 end
 
+--[[
+    Updates the player's score,
+    they must become 0 before the counting so as to not accumulate from earlier turns
+]]
 Functions.updatePoints = function( player )
-    player.points = 0 -- resets points so they wont accumulate
+    player.points = 0
     for i = 1 , #player.field do
         player.points = player.points + player.field[i].points
     end
@@ -155,7 +203,13 @@ Functions.playCard = function( player , card )
     end
 end
 
-Functions.abstractToConcrete = function(card,b) -- cria uma instância concreta da carta abstrata
+--[[
+    Very important
+    Cards exist as abstract objects and must be copied into a table (b) before being put into a deck
+    Without this step, all instances of a card in the game would be considered the same entity,
+    that is, a change in one of them would change all others as well
+]]
+Functions.abstractToConcrete = function(card,b)
     for k,v in pairs(card) do
         b[k] = v
     end
