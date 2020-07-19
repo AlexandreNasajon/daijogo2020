@@ -1,3 +1,4 @@
+math.randomseed(os.time())
 local Functions = require('Functions')
 local Cards = require('Cards')
 
@@ -15,7 +16,13 @@ Deck = {Cards.Clotz,Cards.Clotz,Cards.Clotz,
         Cards.Pretu,Cards.Pretu,Cards.Pretu,
         Cards.Preru,Cards.Preru,Cards.Preru,
         Cards.Prezu,Cards.Prezu,Cards.Prezu,
+        Cards.Wuruku,Cards.Wuruku,
+        Cards.Bonky,Cards.Bonky,
         Cards.Duo,Cards.Duo,
+        Cards.Raskus,Cards.Raskus,
+        Cards.Sarka,Cards.Sarka,
+        Cards.Sobmos,
+        Cards.Tzitunk,
         Cards.Tu,
         Cards.Ru,
         Cards.Zu
@@ -100,8 +107,11 @@ function activationStep( player , opponent )
             print('YOUR FIELD')
             local card = Functions.pick( player.field )
             if card.activated == false then
-                card.effect( card , player , opponent )
-                card.activated = true
+                if card.effect( card , player , opponent ) == true then
+                    card.activated = true
+                else
+                    print('UNIT FAILED TO ACTIVATE')
+                end
             else
                 print('THIS UNIT HAS ALREADY BEEN ACTIVATED THIS TURN')
             end
