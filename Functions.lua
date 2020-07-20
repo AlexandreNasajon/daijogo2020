@@ -34,20 +34,6 @@ Functions.move = function( what , origin , destiny )
     end
 end
 
-Functions.drawCards = function( player , n )
-    if #player.deck > 0 then
-        if n > #player.deck then
-            n = #player.deck
-        end
-        for i = 1 , n do
-            Functions.move( player.deck[#player.deck] , player.deck , player.hand )
-        end
-        print(player.name..' drew '..n..' cards.')
-    else
-        print('THE DECK IS EMPTY')
-    end
-end
-
 Functions.printZone = function( zone )
     local i = 1
     print("#","Name","Points","Has been activated")
@@ -80,19 +66,37 @@ Functions.pick = function( where )
     end
 end
 
-Functions.newPlayer = function()
-    player = {
-        name = '',
-        points = 0,
-        deck = {},
-        hand = {},
-        field = {},
-        bin = {},
-        erased = {},
-        tokenBin = {}
-    }
-    return player
-end
+
+Functions.Player = {
+    name = '',
+    points = 0,
+    deck = {},
+    hand = {},
+    field = {},
+    bin = {},
+    erased = {},
+    tokenBin = {},
+    drawCards = function( n )
+        if #Functions.Player.deck > 0 then
+            if n > #Functions.Player.deck then
+                n = #Functions.Player.deck
+            end
+            for i = 1 , n do
+                Functions.move( Functions.Player.deck[#Functions.Player.deck] , Functions.Player.deck , Functions.Player.hand )
+            end
+            print(Functions.Player.name..' drew '..n..' cards.')
+        else
+            print('THE DECK IS EMPTY')
+        end
+    end,
+    new = function()
+        local instance = {}
+        for k , v in pairs(Functions.Player) do
+            instance[k] = v
+        end
+        return instance
+    end
+}
 
 --[[ Creates a unit token on the player's field,
     since they dont have effects, they cant be activated
@@ -147,10 +151,10 @@ end
 Functions.checkDeath = function( card , player )
     if card.points < 1 then
         if card.name == 'Token' then
-            Functions.move( card , player.field , player.tokenBin)
+            card:move( player.field , player.tokenBin)
         else
             Functions.resetCard( card )
-            Functions.move( card , player.field , player.bin )
+            card:move( player.field , player.bin )
         end
         print(card.name..' was destroyed.')
     end
@@ -165,7 +169,7 @@ Functions.moveMany = function( n , origin , destiny )
     if #origin >= n then
         while n > 0 do
             print('Select '..n..' card(s):')
-            Functions.move( Functions.pick( origin ) , origin , destiny )
+            Functions.pick( origin ):move( origin , destiny )
             n = n - 1
         end
         return true
@@ -201,19 +205,6 @@ Functions.playCard = function( player , card )
             print('YOU CANNOT PAY THE COST')
         end
     end
-end
-
---[[
-    Very important
-    Cards exist as abstract objects and must be copied into a table (b) before being put into a deck
-    Without this step, all instances of a card in the game would be considered the same entity,
-    that is, a change in one of them would change all others as well
-]]
-Functions.abstractToConcrete = function(card,b)
-    for k,v in pairs(card) do
-        b[k] = v
-    end
-    return b
 end
 
 return Functions
