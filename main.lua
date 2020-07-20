@@ -11,30 +11,26 @@ print('player 2 name: ')
 player2.name = io.read()
 print('player 2 name is '..player2.name)
 
-Deck = {Cards.Clotz,Cards.Clotz,Cards.Clotz,
-        Cards.Wuru,Cards.Wuru,Cards.Wuru,
-        Cards.Pretu,Cards.Pretu,Cards.Pretu,
-        Cards.Preru,Cards.Preru,Cards.Preru,
-        Cards.Prezu,Cards.Prezu,Cards.Prezu,
-        Cards.Wuruku,Cards.Wuruku,
-        Cards.Bonky,Cards.Bonky,
-        Cards.Duo,Cards.Duo,
-        Cards.Raskus,Cards.Raskus,
-        Cards.Sarka,Cards.Sarka,
-        Cards.Sobmos,
-        Cards.Tzitunk,
-        Cards.Tu,
-        Cards.Ru,
-        Cards.Zu
-    
+Deck = {Cards.Clotz.new(),Cards.Clotz.new(),Cards.Clotz.new(),
+        Cards.Wuru.new(),Cards.Wuru.new(),Cards.Wuru.new(),
+        Cards.Pretu.new(),Cards.Pretu.new(),Cards.Pretu.new(),
+        Cards.Preru.new(),Cards.Preru.new(),Cards.Preru.new(),
+        Cards.Prezu.new(),Cards.Prezu.new(),Cards.Prezu.new(),
+        Cards.Wuruku.new(),Cards.Wuruku.new(),
+        Cards.Bonky.new(),Cards.Bonky.new(),
+        Cards.Duo.new(),Cards.Duo.new(),
+        Cards.Raskus.new(),Cards.Raskus.new(),
+        Cards.Sarka.new(),Cards.Sarka.new(),
+        Cards.Sobmos.new(),
+        Cards.Tzitunk.new(),
+        Cards.Tu.new(),
+        Cards.Ru.new(),
+        Cards.Zu.new()
     }
 
 function setDeck( player )
-    tempcard = {}
-    for k,v in pairs( Deck ) do
-        tempcard = Functions.abstractToConcrete(v,tempcard)
-        player.deck[#player.deck+1] = tempcard
-        tempcard = {}
+    for i = 1 , #Deck do
+        player.deck[#player.deck+1] = Deck[i]
     end
     Functions.shuffle( player.deck )
 end
@@ -42,29 +38,24 @@ end
 function setGame( player , opponent )
     setDeck( player )
     setDeck( opponent )
-    i = 0
-    while i < 4 do
-        Functions.move( player.deck[#player.deck] , player.deck , player.hand ) -- player compra 4
-        Functions.move( opponent.deck[#opponent.deck] , opponent.deck , opponent.hand ) -- oponente compra 4
-        i = i + 1
-    end
-    print('GAME IS SET')
+    player:drawCards( 4 )
+    opponent:drawCards( 4 )
 end
 
-function upkeep( player , opponent )
+function upkeep( player )
     for i = 1 , #player.field do
         player.field[i].activated = false
     end
 end
 
-function winCheck( player , opponent )
+function winCheck( player )
     if player.points >= 12 and player.points > opponent.points then
         print(player.name..' WON!')
         return true
     end
 end
 
-function selectionStep( player , opponent )
+function selectionStep( player )
     print('PLAYER '..player.name..' TURN')
     print('SELECTION STEP')
     local selectionZone = {} -- separa zona pra colocar 2 cartas do topo do deck
@@ -120,9 +111,9 @@ function activationStep( player , opponent )
 end
 
 function turn(player , opponent)
-    upkeep( player , opponent )
-    if winCheck( player , opponent ) == true then return true end
-    selectionStep( player , opponent )
+    upkeep( player )
+    if winCheck( player ) == true then return true end
+    selectionStep( player )
     deploymentStep( player , opponent )
     activationStep( player , opponent ) 
 end
