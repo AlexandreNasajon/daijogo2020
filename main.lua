@@ -11,26 +11,26 @@ print('player 2 name: ')
 player2.name = io.read()
 print('player 2 name is '..player2.name)
 
-Deck = {Cards.Clotz.new(),Cards.Clotz.new(),Cards.Clotz.new(),
-        Cards.Wuru.new(),Cards.Wuru.new(),Cards.Wuru.new(),
-        Cards.Pretu.new(),Cards.Pretu.new(),Cards.Pretu.new(),
-        Cards.Preru.new(),Cards.Preru.new(),Cards.Preru.new(),
-        Cards.Prezu.new(),Cards.Prezu.new(),Cards.Prezu.new(),
-        Cards.Wuruku.new(),Cards.Wuruku.new(),
-        Cards.Bonky.new(),Cards.Bonky.new(),
-        Cards.Duo.new(),Cards.Duo.new(),
-        Cards.Raskus.new(),Cards.Raskus.new(),
-        Cards.Sarka.new(),Cards.Sarka.new(),
-        Cards.Sobmos.new(),
-        Cards.Tzitunk.new(),
-        Cards.Tu.new(),
-        Cards.Ru.new(),
-        Cards.Zu.new()
+Deck = {Cards.Clotz,Cards.Clotz,Cards.Clotz,
+        Cards.Wuru,Cards.Wuru,Cards.Wuru,
+        Cards.Pretu,Cards.Pretu,Cards.Pretu,
+        Cards.Preru,Cards.Preru,Cards.Preru,
+        Cards.Prezu,Cards.Prezu,Cards.Prezu,
+        Cards.Wuruku,Cards.Wuruku,
+        Cards.Bonky,Cards.Bonky,
+        Cards.Duo,Cards.Duo,
+        Cards.Raskus,Cards.Raskus,
+        Cards.Sarka,Cards.Sarka,
+        Cards.Sobmos,
+        Cards.Tzitunk,
+        Cards.Tu,
+        Cards.Ru,
+        Cards.Zu
     }
 
 function setDeck( player )
     for i = 1 , #Deck do
-        player.deck[#player.deck+1] = Deck[i]
+        player.deck[#player.deck+1] = Deck[i].new()
     end
     Functions.shuffle( player.deck )
 end
