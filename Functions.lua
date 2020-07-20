@@ -76,15 +76,15 @@ Functions.Player = {
     bin = {},
     erased = {},
     tokenBin = {},
-    drawCards = function( n )
-        if #Functions.Player.deck > 0 then
-            if n > #Functions.Player.deck then
-                n = #Functions.Player.deck
+    drawCards = function( player , n )
+        if #player.deck > 0 then
+            if n > #player.deck then
+                n = #player.deck
             end
             for i = 1 , n do
-                Functions.move( Functions.Player.deck[#Functions.Player.deck] , Functions.Player.deck , Functions.Player.hand )
+                Functions.move( player.deck[#player.deck] , player.deck , player.hand )
             end
-            print(Functions.Player.name..' drew '..n..' cards.')
+            print(player.name..' drew '..n..' cards.')
         else
             print('THE DECK IS EMPTY')
         end
