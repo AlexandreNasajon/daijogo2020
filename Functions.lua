@@ -67,7 +67,8 @@ Functions.pick = function( where )
 end
 
 
-Functions.Player = {
+Functions.newPlayer = function()
+    Player = {
     name = '',
     points = 0,
     deck = {},
@@ -88,15 +89,10 @@ Functions.Player = {
         else
             print('THE DECK IS EMPTY')
         end
-    end,
-    new = function()
-        local instance = {}
-        for k , v in pairs(Functions.Player) do
-            instance[k] = v
-        end
-        return instance
     end
-}
+    }
+    return Player
+end
 
 --[[ Creates a unit token on the player's field,
     since they dont have effects, they cant be activated
