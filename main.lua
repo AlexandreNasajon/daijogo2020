@@ -30,7 +30,9 @@ Deck = {Cards.Clotz,Cards.Clotz,Cards.Clotz,
 
 function setDeck( player )
     for i = 1 , #Deck do
-        player.deck[#player.deck+1] = Deck[i].new()
+        local card = Deck[i]
+        setmetatable( card , Cards.cardIdeal )
+        player.deck[#player.deck+1] = card:new()
     end
     Functions.shuffle( player.deck )
 end
@@ -43,9 +45,16 @@ function setGame( player , opponent )
 end
 
 function upkeep( player )
-    for i = 1 , #player.field do
-        player.field[i].activated = false
+    function clean(zone)
+        for i = 1 , #zone do
+            zone[i].activated = false
+        end
     end
+    clean(player.field)
+    clean(player.hand)
+    clean(player.bin)
+    clean(player.deck)
+    clean(player.erased)
 end
 
 function winCheck( player )
