@@ -9,6 +9,20 @@ Cards = {}
 
 ]]
 
+Cards.cardIdeal = {
+    new = function(self)
+        local instance = {move = function( self , origin , destiny )
+            Functions.move( self , origin , destiny )
+        end}
+        for k , v in pairs(self) do
+            instance[k] = v
+        end
+        return instance
+    end
+}
+
+Cards.cardIdeal.__index = Cards.cardIdeal
+
 Cards.blank = {
     name = '',
     originalPoints = 0,
@@ -16,24 +30,6 @@ Cards.blank = {
     activated = false,
     costText = '',
     effectText = '',
-    new = function()
-        local instance = {}
-        for k , v in pairs(Cards.blank) do
-            instance[k] = v
-        end
-        return instance
-    end,
-    move = function( origin , destiny )
-        destiny[#destiny+1] = Cards.blank
-        local j = Functions.find( origin , Cards.blank)
-        if j then
-            while j <= #origin do
-                origin[j] = origin[j+1]
-                j = j+1
-            end
-        else print('J É NIL') -- debugger
-        end
-    end,
     cost = function( player )
     end,
     effect = function( card , player , opponent )
@@ -47,16 +43,6 @@ Cards.Clotz = {
     activated = false,
     costText = '',
     effectText = 'Move 1 card from the top of your deck to your bin.',
-    new = function()
-        local instance = {}
-        for k , v in pairs(Cards.Clotz) do
-            instance[k] = v
-        end
-        return instance
-    end,
-    move = function( card , origin , destiny )
-        return Functions.move( card , origin , destiny )
-    end,
     cost = function( player )
         return true
     end,
@@ -78,16 +64,6 @@ Cards.Wuru = {
     activated = false,
     costText = '',
     effectText = 'Destroy this unit to give -1 point to an enemy unit.',
-    new = function()
-        local instance = {}
-        for k , v in pairs(Cards.Wuru) do
-            instance[k] = v
-        end
-        return instance
-    end,
-    move = function( card , origin , destiny )
-        return Functions.move( card , origin , destiny )
-    end,
     cost = function( player )
         return true
     end,
@@ -110,23 +86,14 @@ Cards.Prezu = {
     activated = false, 
     costText = '',
     effectText = 'Discard a card to draw a card.',
-    new = function()
-        local instance = {}
-        for k , v in pairs(Cards.Prezu) do
-            instance[k] = v
-        end
-        return instance
-    end,
-    move = function( card , origin , destiny )
-        return Functions.move( card , origin , destiny )
-    end,
     cost = function( player )
         return true
     end,
     effect = function( card , player , opponent )
         if #player.hand > 0 then
             print('Discard a card from your hand:')
-            Functions.pick( player.hand ):move( player.hand , player.bin )
+            local discarded = Functions.pick( player.hand )
+            discarded:move( player.hand , player.bin )
             player:drawCards( 1 )
             print('You discarded a card and drew another card.')
             return true
@@ -143,16 +110,6 @@ Cards.Preru = {
     activated = false,
     costText = '',
     effectText = 'Erase 1 card from your bin to create a 1 point unit token.',
-    new = function()
-        local instance = {}
-        for k , v in pairs(Cards.Preru) do
-            instance[k] = v
-        end
-        return instance
-    end,
-    move = function( card , origin , destiny )
-        return Functions.move( card , origin , destiny )
-    end,
     cost = function( player )
         return true
     end,
@@ -173,16 +130,6 @@ Cards.Pretu = {
     activated = false,
     costText = '',
     effectText = 'Give +1 point to another unit you control.',
-    new = function()
-        local instance = {}
-        for k , v in pairs(Cards.Pretu) do
-            instance[k] = v
-        end
-        return instance
-    end,
-    move = function( card , origin , destiny )
-        return Functions.move( card , origin , destiny )
-    end,
     cost = function( player )
         return true
     end,
@@ -209,16 +156,6 @@ Cards.Bonky = {
     activated = false,
     costText = 'Erase 1 card from your bin.',
     effectText = 'Destroy this unit to draw 2 cards.',
-    new = function()
-        local instance = {}
-        for k , v in pairs(Cards.Bonky) do
-            instance[k] = v
-        end
-        return instance
-    end,
-    move = function( card , origin , destiny )
-        return Functions.move( card , origin , destiny )
-    end,
     cost = function( player )
         return Functions.moveMany( 1 , player.bin , player.erased )
     end,
@@ -237,16 +174,6 @@ Cards.Wuruku = {
     activated = false,
     costText = 'Erase 1 card from your bin.',
     effectText = 'Destroy this unit to give -2 points to an enemy unit.',
-    new = function()
-        local instance = {}
-        for k , v in pairs(Cards.Wuruku) do
-            instance[k] = v
-        end
-        return instance
-    end,
-    move = function( card , origin , destiny )
-        return Functions.move( card , origin , destiny )
-    end,
     cost = function( player )
         return Functions.moveMany( 1 , player.bin , player.erased )
     end,
@@ -269,16 +196,6 @@ Cards.Duo = {
     activated = false,
     costText = 'Erase 2 cards from your bin.',
     effectText = 'Erase 2 cards from your bin to draw cards until you have 2 in your hand.',
-    new = function()
-        local instance = {}
-        for k , v in pairs(Cards.Duo) do
-            instance[k] = v
-        end
-        return instance
-    end,
-    move = function( card , origin , destiny )
-        return Functions.move( card , origin , destiny )
-    end,
     cost = function( player )
         return Functions.moveMany( 2 , player.bin , player.erased )
     end,
@@ -301,16 +218,6 @@ Cards.Raskus = {
     activated = false,
     costText = 'Erase 2 cards from your bin.',
     effectText = 'Choose: Discard 2 cards then draw 2 cards; Or erase 2 cards from your hand to add 1 card from your bin to your hand.',
-    new = function()
-        local instance = {}
-        for k , v in pairs(Cards.Raskus) do
-            instance[k] = v
-        end
-        return instance
-    end,
-    move = function( card , origin , destiny )
-        return Functions.move( card , origin , destiny )
-    end,
     cost = function( player )
         return Functions.moveMany( 2 , player.bin , player.erased ) 
     end,
@@ -345,16 +252,6 @@ Cards.Sobmos = {
     activated = false,
     costText = 'Erase 3 cards from your bin.',
     effectText = 'Choose: Erase 2 cards from your bin to create two 1 point unit tokens; Or destroy any number of tokens you control to gain control over an enemy unit with points equal to the number of destroyed tokens.',
-    new = function()
-        local instance = {}
-        for k , v in pairs(Cards.Sobmos) do
-            instance[k] = v
-        end
-        return instance
-    end,
-    move = function( card , origin , destiny )
-        return Functions.move( card , origin , destiny )
-    end,
     cost = function( player )
         return Functions.moveMany( 3 , player.bin , player.erased ) 
     end,
@@ -431,16 +328,6 @@ Cards.Sarka = {
     activated = false,
     costText = 'Erase 2 cards from your bin',
     effectText = 'Erase 2 cards from your bin to give -1 to an enemy unit and +1 to this unit.',
-    new = function()
-        local instance = {}
-        for k , v in pairs(Cards.Sarka) do
-            instance[k] = v
-        end
-        return instance
-    end,
-    move = function( card , origin , destiny )
-        return Functions.move( card , origin , destiny )
-    end,
     cost = function( player )
         return Functions.moveMany( 2 , player.bin , player.erased )
     end,
@@ -465,16 +352,6 @@ Cards.Tzitunk= {
     activated = false,
     costText = 'Erase 3 cards from your bin.',
     effectText = 'Discard any number of cards, then for each card discarded give -1 point to an enemy unit.',
-    new = function()
-        local instance = {}
-        for k , v in pairs(Cards.Tzitunk) do
-            instance[k] = v
-        end
-        return instance
-    end,
-    move = function( card , origin , destiny )
-        return Functions.move( card , origin , destiny )
-    end,
     cost = function( player )
         return Functions.moveMany( 3 , player.bin , player.erased )
     end,
@@ -516,16 +393,6 @@ Cards.Zu = {
     activated = false,
     costText = 'Erase 4 cards from your bin.',
     effectText = 'Erase 4 cards from your bin to draw cards until you have 4 in your hand.',
-    new = function()
-        local instance = {}
-        for k , v in pairs(Cards.Zu) do
-            instance[k] = v
-        end
-        return instance
-    end,
-    move = function( card , origin , destiny )
-        return Functions.move( card , origin , destiny )
-    end,
     cost = function( player )
         return Functions.moveMany( 4 , player.bin , player.erased )
     end,
@@ -548,16 +415,6 @@ Cards.Tu = {
     activated = false,
     costText = 'Erase 4 cards from your bin.',
     effectText = 'Erase 4 cards from your bin to distribute +4 points among units you control.',
-    new = function()
-        local instance = {}
-        for k , v in pairs(Cards.Tu) do
-            instance[k] = v
-        end
-        return instance
-    end,
-    move = function( card , origin , destiny )
-        return Functions.move( card , origin , destiny )
-    end,
     cost = function( player )
         return Functions.moveMany( 4 , player.bin , player.erased )
     end,
@@ -582,16 +439,6 @@ Cards.Ru = {
     activated = false,
     costText = 'Erase 4 cards from your bin.',
     effectText = 'Erase 4 cards from your bin to create four 1 point unit tokens.',
-    new = function()
-        local instance = {}
-        for k , v in pairs(Cards.Ru) do
-            instance[k] = v
-        end
-        return instance
-    end,
-    move = function( card , origin , destiny )
-        return Functions.move( card , origin , destiny )
-    end,
     cost = function( player )
         return Functions.moveMany( 4 , player.bin , player.erased )
     end,
@@ -614,13 +461,6 @@ Cards.Boom = {
     activated = false,
     costText = 'Destroy a unit you control.',
     effectText = 'Destroy this unit to destroy an enemy unit.',
-    new = function()
-        local instance = {}
-        for k , v in pairs(Cards.Boom) do
-            instance[k] = v
-        end
-        return instance
-    end,
     cost = function( player )
             return Functions.moveMany( 1 , player.field , player.bin )
     end,
@@ -636,13 +476,6 @@ Cards.Treeph = {
     activated = false,
     costText = 'Destroy a unit you control.',
     effectText = "Discard a card to give -X to an enemy unit; X is equal to the card's points",
-    new = function()
-        local instance = {}
-        for k , v in pairs(Cards.Treeph) do
-            instance[k] = v
-        end
-        return instance
-    end,
     cost = function( player )
         return Functions.moveMany( 1 , player.field , player.bin )
     end,
