@@ -83,7 +83,8 @@ Functions.newPlayer = function()
                 n = #player.deck
             end
             for i = 1 , n do
-                Functions.move( player.deck[#player.deck] , player.deck , player.hand )
+                local card = player.deck[#player.deck]
+                card:move( player.deck , player.hand )
             end
             print(player.name..' drew '..n..' cards.')
         else
@@ -165,7 +166,8 @@ Functions.moveMany = function( n , origin , destiny )
     if #origin >= n then
         while n > 0 do
             print('Select '..n..' card(s):')
-            Functions.pick( origin ):move( origin , destiny )
+            local card = Functions.pick( origin )
+            card:move( origin , destiny )
             n = n - 1
         end
         return true
