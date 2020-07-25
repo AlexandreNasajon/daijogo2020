@@ -7,13 +7,44 @@ Cards = {}
     The effect must return true, otherwise the unit could be activated again in the same turn.
     If the effect returns false, the unit fails to activate.
 
+    cardIdeal is the metatable from where all cards get the new and the move functions
+
 ]]
+
+function newToken(player)
+    player.field[#player.field + 1] = Cards.Token:new()
+    print(player.name..' created a 1 point unit token.')
+end
 
 Cards.cardIdeal = {
     new = function(self)
-        local instance = {move = function( self , origin , destiny )
-            Functions.move( self , origin , destiny )
-        end}
+        local instance = {
+            activated = false,
+            move = function( self , origin , destiny )
+                Functions.move( self , origin , destiny )
+            end,
+            reset = function( self )
+                self.points = self.originalPoints
+                self.activated = false
+            end,
+            printCard = function( self )
+                print('Name: '..self.name)
+                print('Points: '..self.points)
+                print('Cost: '..self.costText)
+                print('Effect: '..self.effectText)
+            end,
+            checkDeath = function( self )
+                if self.points < 1 then
+                    if self.name == 'Token' then
+                        self:move( self.owner.field , self.owner.tokenBin)
+                    else
+                        self:reset()
+                        self:move( self.owner.field , self.owner.bin )
+                    end
+                    print(self.name..' was destroyed.')
+                end
+            end
+        }
         for k , v in pairs(self) do
             instance[k] = v
         end
@@ -27,7 +58,6 @@ Cards.blank = {
     name = '',
     originalPoints = 0,
     points = 0,
-    activated = false,
     costText = '',
     effectText = '',
     cost = function( player )
@@ -36,11 +66,25 @@ Cards.blank = {
     end
 }
 
+ Cards.Token = {
+        name = 'Token',
+        originalPoints = 1,
+        points = 1,
+        costText = '',
+        effectText = '',
+        cost = function( player )
+            return true
+        end,
+        effect = function( card , player , opponent )
+            return false
+        end
+    }
+
 Cards.Clotz = {
     name = 'Clotz',
     originalPoints = 1,
     points = 1,
-    activated = false,
+    
     costText = '',
     effectText = 'Move 1 card from the top of your deck to your bin.',
     cost = function( player )
@@ -61,7 +105,7 @@ Cards.Wuru = {
     name = 'Wuru',
     originalPoints = 1,
     points = 1,
-    activated = false,
+    
     costText = '',
     effectText = 'Destroy this unit to give -1 point to an enemy unit.',
     cost = function( player )
@@ -73,7 +117,7 @@ Cards.Wuru = {
             local target = Functions.pick( opponent.field )
             target.points = target.points - 1
             print(card.name..' was destroyed and '..target.name..' lost 1 point.')
-            Functions.checkDeath( target , opponent )
+            target:checkDeath()
         end
         return true
     end
@@ -83,7 +127,7 @@ Cards.Prezu = {
     name = 'Prezu',
     originalPoints = 1,
     points = 1,
-    activated = false, 
+     
     costText = '',
     effectText = 'Discard a card to draw a card.',
     cost = function( player )
@@ -107,7 +151,7 @@ Cards.Preru = {
     name = 'Preru',
     originalPoints = 1,
     points = 1,
-    activated = false,
+    
     costText = '',
     effectText = 'Erase 1 card from your bin to create a 1 point unit token.',
     cost = function( player )
@@ -115,7 +159,7 @@ Cards.Preru = {
     end,
     effect = function( card , player , opponent )
         if Functions.moveMany( 1 , player.bin , player.erased ) == true then
-            Functions.newToken( player )
+            newToken( player )
             return true
         else
             return false
@@ -127,7 +171,7 @@ Cards.Pretu = {
     name = 'Pretu',
     originalPoints = 1,
     points = 1,
-    activated = false,
+    
     costText = '',
     effectText = 'Give +1 point to another unit you control.',
     cost = function( player )
@@ -153,7 +197,7 @@ Cards.Bonky = {
     name = 'Bonky',
     originalPoints = 1,
     points = 1,
-    activated = false,
+    
     costText = 'Erase 1 card from your bin.',
     effectText = 'Destroy this unit to draw 2 cards.',
     cost = function( player )
@@ -171,7 +215,7 @@ Cards.Wuruku = {
     name = 'Wuruku',
     originalPoints = 1,
     points = 1,
-    activated = false,
+    
     costText = 'Erase 1 card from your bin.',
     effectText = 'Destroy this unit to give -2 points to an enemy unit.',
     cost = function( player )
@@ -183,7 +227,7 @@ Cards.Wuruku = {
             local target = Functions.pick( opponent.field )
             target.points = target.points - 2
             print(card.name..' was destroyed and '..target.name..' lost 2 points.')
-            Functions.checkDeath( target , opponent )
+            target:checkDeath()
         end
         return true
     end
@@ -193,7 +237,7 @@ Cards.Duo = {
     name = 'Duo',
     originalPoints = 2, 
     points = 2,
-    activated = false,
+    
     costText = 'Erase 2 cards from your bin.',
     effectText = 'Erase 2 cards from your bin to draw cards until you have 2 in your hand.',
     cost = function( player )
@@ -215,7 +259,7 @@ Cards.Raskus = {
     name = 'Raskus',
     originalPoints = 2, 
     points = 2,
-    activated = false,
+    
     costText = 'Erase 2 cards from your bin.',
     effectText = 'Choose: Discard 2 cards then draw 2 cards; Or erase 2 cards from your hand to add 1 card from your bin to your hand.',
     cost = function( player )
@@ -249,7 +293,7 @@ Cards.Sobmos = {
     name = 'Sobmos',
     originalPoints = 1, 
     points = 1,
-    activated = false,
+    
     costText = 'Erase 3 cards from your bin.',
     effectText = 'Choose: Erase 2 cards from your bin to create two 1 point unit tokens; Or destroy any number of tokens you control to gain control over an enemy unit with points equal to the number of destroyed tokens.',
     cost = function( player )
@@ -265,8 +309,8 @@ Cards.Sobmos = {
         elseif opt == 1 then
             print('Erase 2 cards from your bin:')
             if Functions.moveMany( 2 , player.bin , player.erased ) == true then
-                Functions.newToken( player )
-                Functions.newToken( player )
+                newToken( player )
+                newToken( player )
                 return true
             else
                 return false
@@ -301,7 +345,7 @@ Cards.Sobmos = {
                     end
                     if numTargets > 0 then
                         while true do
-                            print('Gain control over an enemy unit with '..n..'points:')
+                            print('Gain control over an enemy unit with '..n..' points:')
                             local target = Functions.pick( opponent.field )
                             if target.points <= n then
                                 target:move( opponent.field , player.field )
@@ -325,7 +369,7 @@ Cards.Sarka = {
     name = 'Sarka',
     originalPoints = 2, 
     points = 2,
-    activated = false,
+    
     costText = 'Erase 2 cards from your bin',
     effectText = 'Erase 2 cards from your bin to give -1 to an enemy unit and +1 to this unit.',
     cost = function( player )
@@ -337,10 +381,11 @@ Cards.Sarka = {
                 local target = Functions.pick( opponent.field )
                 target.points = target.points - 1
                 print(target.name..' got -1 point.')
-                Functions.checkDeath( target )
+                target:checkDeath()
             end
             card.points = card.points + 1
             print(card.name..' got +1 point.')
+            return true
         end
     end
 }
@@ -349,7 +394,7 @@ Cards.Tzitunk= {
     name = 'Tzitunk',
     originalPoints = 3, 
     points = 3,
-    activated = false,
+    
     costText = 'Erase 3 cards from your bin.',
     effectText = 'Discard any number of cards, then for each card discarded give -1 point to an enemy unit.',
     cost = function( player )
@@ -374,7 +419,7 @@ Cards.Tzitunk= {
                         local target = Functions.pick( opponent.field )
                         target.points = target.points - 1
                         print(target.name..' got -1 point.')
-                        Functions.checkDeath(target)
+                        target:checkDeath()
                         d = d - 1
                     else
                         print('There are no enemy units.')
@@ -390,7 +435,7 @@ Cards.Zu = {
     name = 'Zu',
     originalPoints = 4,
     points = 4,
-    activated = false,
+    
     costText = 'Erase 4 cards from your bin.',
     effectText = 'Erase 4 cards from your bin to draw cards until you have 4 in your hand.',
     cost = function( player )
@@ -412,7 +457,7 @@ Cards.Tu = {
     name = 'Tu',
     originalPoints = 4,
     points = 4,
-    activated = false,
+    
     costText = 'Erase 4 cards from your bin.',
     effectText = 'Erase 4 cards from your bin to distribute +4 points among units you control.',
     cost = function( player )
@@ -436,7 +481,7 @@ Cards.Ru = {
     name = 'Ru',
     originalPoints = 4,
     points = 4,
-    activated = false,
+    
     costText = 'Erase 4 cards from your bin.',
     effectText = 'Erase 4 cards from your bin to create four 1 point unit tokens.',
     cost = function( player )
@@ -445,7 +490,7 @@ Cards.Ru = {
     effect = function( card , player , opponent )
         if Functions.moveMany( 4 , player.bin , player.erased ) == true then
             for i = 1 , 4 do
-                Functions.newToken( player )
+                newToken( player )
             end
             return true
         else
@@ -458,7 +503,7 @@ Cards.Boom = {
     name = 'Boom',
     originalPoints = 1,
     points = 1,
-    activated = false,
+    
     costText = 'Destroy a unit you control.',
     effectText = 'Destroy this unit to destroy an enemy unit.',
     cost = function( player )
@@ -473,7 +518,7 @@ Cards.Treeph = {
     name = 'Treeph',
     originalPoints = 1,
     points = 1,
-    activated = false,
+    
     costText = 'Destroy a unit you control.',
     effectText = "Discard a card to give -X to an enemy unit; X is equal to the card's points",
     cost = function( player )
@@ -484,7 +529,7 @@ Cards.Treeph = {
         local target = Functions.pick( opponent.field )
         target.points = target.points - discarded.points
         print(target.name..' got -'..discarded.points..' points.')
-        Functions.checkDeath( target )
+        target:checkDeath()
     end
 }
 
@@ -492,7 +537,7 @@ Cards.Brum = {
     name = 'Brum',
     originalPoints = 4,
     points = 4,
-    activated = false,
+    
     costText = 'Destroy 2 units you control.',
     effectText = "Choose: ",
     cost = function( player )
