@@ -24,13 +24,13 @@ end
 ]]
 Functions.move = function( what , origin , destiny )
     destiny[#destiny+1] = what
-    local j = Functions.find( origin , what)
+    local j = Functions.find( origin , what )
     if j then
         while j <= #origin do
             origin[j] = origin[j+1]
             j = j+1
         end
-    else print('J É NIL') -- debugger
+    else print('J is NIL') -- debugger
     end
 end
 
@@ -43,11 +43,22 @@ Functions.printZone = function( zone )
     end
 end
 
-Functions.printCard = function( card )
-    print('Name: '..card.name)
-    print('Points: '..card.points)
-    print('Cost: '..card.costText)
-    print('Effect: '..card.effectText)
+function printField(player)
+    local s = 'Field: '
+    if #player.field > 0 then
+        for i = 1 , #player.field do 
+            s = s..player.field[i].name..'/'..player.field[i].points..' '
+        end 
+    end
+    print(s)
+end
+
+Functions.printBoard = function( player , opponent )
+    print('Opponent: '..opponent.name,'Score: '..opponent.score,'Cards in hand: '..#opponent.hand,'Cards in bin: '..#opponent.bin)
+    printField(opponent)
+    print('-------------------------------------------------------------------------------------')
+    printField(player)
+    print('Player: '..player.name,'Score: '..player.score,'Cards in hand: '..#player.hand,'Cards in bin: '..#player.bin)
 end
 
 --[[
@@ -58,19 +69,16 @@ Functions.pick = function( where )
         Functions.printZone( where)
         print('Pick one:')
         local opt = tonumber(io.read())
-        if opt ~= nil then
-            if opt > 0 and opt <= #where then
-                return where[opt]
-            end
+        if opt and opt > 0 and opt <= #where then
+            return where[opt]
         end
     end
 end
 
-
 Functions.newPlayer = function()
     Player = {
     name = '',
-    points = 0,
+    score = 0,
     deck = {},
     hand = {},
     field = {},
@@ -90,31 +98,15 @@ Functions.newPlayer = function()
         else
             print('THE DECK IS EMPTY')
         end
-    end
+    end,
+    updatePoints = function( player )
+        player.score = 0
+        for i = 1 , #player.field do
+            player.score = player.score + player.field[i].points
+        end
+    end    
     }
     return Player
-end
-
---[[ Creates a unit token on the player's field,
-    since they dont have effects, they cant be activated
-]]
-Functions.newToken = function( player )
-    local token = {
-        name = 'Token',
-        originalPoints = 1,
-        points = 1,
-        activated = false,
-        costText = '',
-        effectText = '',
-        cost = function( player )
-            return true
-        end,
-        effect = function( card , player , opponent )
-            return false
-        end
-    }
-    player.field[#player.field + 1] = token
-    print(player.name..' created a 1 point unit token.')
 end
 
 --[[ Certain effects will ask the player to destroy tokens in order to activate
@@ -130,32 +122,6 @@ Functions.countTokens = function( player )
     return n
 end
 
---[[ When cards move from the field to any other zone, they must be reset,
-    unless the card moves from one field to another, that is.
-    It's important to reset the card in this situation so as
-    to mimic the physical card game, where counters cant be moved outside of the field.
-]]
-Functions.resetCard = function( card )
-    card.points = card.originalPoints
-    card.activated = false
-end
-
---[[
-    When a unit's points become 0, it is destroyed (sent to the bin)
-    Since tokens dont go to the regular bin and should be completely eliminated,
-    the player.tokenBin serves as an easy way to get rid of them
-]]
-Functions.checkDeath = function( card , player )
-    if card.points < 1 then
-        if card.name == 'Token' then
-            card:move( player.field , player.tokenBin)
-        else
-            Functions.resetCard( card )
-            card:move( player.field , player.bin )
-        end
-        print(card.name..' was destroyed.')
-    end
-end
 
 --[[
     Some effects require the player to move many cards from a zone to another
@@ -174,19 +140,8 @@ Functions.moveMany = function( n , origin , destiny )
     end
 end
 
---[[
-    Updates the player's score,
-    they must become 0 before the counting so as to not accumulate from earlier turns
-]]
-Functions.updatePoints = function( player )
-    player.points = 0
-    for i = 1 , #player.field do
-        player.points = player.points + player.field[i].points
-    end
-end
-
 Functions.playCard = function( player , card )
-    Functions.printCard( card )
+    card:printCard()
     print('PLAY CARD?')
     print('0 - RETURN')
     print('1 - PLAY')
@@ -195,8 +150,8 @@ Functions.playCard = function( player , card )
         return 
     else
         if card.cost( player ) == true then
-            Functions.move( card , player.hand , player.field )
-            Functions.updatePoints( player )
+            card:move( player.hand , player.field )
+            player:updatePoints()
             print(player.name..' PLAYED '..card.name)
             return
         else
