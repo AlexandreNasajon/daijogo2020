@@ -32,12 +32,15 @@ function setDeck( player )
     for i = 1 , #Deck do
         local card = Deck[i]
         setmetatable( card , Cards.cardIdeal )
-        player.deck[#player.deck+1] = card:new()
+        local newCard = card:new()
+        newCard.owner = player
+        player.deck[#player.deck+1] = newCard
     end
     Functions.shuffle( player.deck )
 end
 
 function setGame( player , opponent )
+    setmetatable( Cards.Token , Cards.cardIdeal )
     setDeck( player )
     setDeck( opponent )
     player:drawCards( 4 )
@@ -58,7 +61,7 @@ function upkeep( player )
 end
 
 function winCheck( player )
-    if player.points >= 12 and player.points > opponent.points then
+    if player.score >= 12 and player.score > opponent.points then
         print(player.name..' WON!')
         return true
     end
@@ -79,8 +82,7 @@ end
 function deploymentStep( player , opponent )
     while true do
         print('DEPLOYMENT STEP')
-        print('YOUR POINTS: '..player.points)
-        print('CARDS IN BIN: '..#player.bin)
+        Functions.printBoard( player , opponent )
         print('0 - GO TO ACTIVATION STEP')
         print('1 - PLAY CARD FROM HAND')
         local opt = tonumber(io.read())
@@ -96,8 +98,7 @@ end
 function activationStep( player , opponent )
     while true do
         print('ACTIVATION STEP')
-        print('YOUR POINTS: '..player.points)
-        print('CARDS IN BIN: '..#player.bin)
+        Functions.printBoard( player , opponent )
         print('0 - END TURN')
         print('1 - ACTIVATE UNITS')
         local opt = tonumber(io.read())
